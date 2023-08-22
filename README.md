@@ -2,6 +2,11 @@
 
 HTML live reload for Bun
 
+## Install
+```
+bun install git@github.com:aabccd021/bun-html-live-reload.git
+```
+
 ## Getting Started
 
 ```ts
