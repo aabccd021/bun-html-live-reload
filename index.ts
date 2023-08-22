@@ -3,7 +3,9 @@ import type {
   ServerWebSocket,
   WebSocketHandler,
   WebSocketServeOptions,
+  BuildConfig,
 } from "bun";
+import { FSWatcher, watch } from "fs";
 
 declare global {
   var ws: ServerWebSocket<unknown> | undefined;
@@ -43,6 +45,8 @@ export type LiveReloadOptions = {
    * @default "__bun_live_reload_websocket__"
    */
   readonly wsPath?: string;
+  readonly buildConfig?: BuildConfig;
+  readonly watchPath?: string;
 };
 
 /**
@@ -77,6 +81,11 @@ export const withHtmlLiveReload = <
   const wsPath = options?.wsPath ?? "__bun_live_reload_websocket__";
   const wsUrl = `${hostname}:${port}/${wsPath}`;
 
+  const { buildConfig, watchPath } = options ?? {};
+  if (buildConfig) Bun.build(buildConfig);
+  let watcher: FSWatcher;
+  if (watchPath) watcher = watch(watchPath);
+
   return {
     ...serveOptions,
     fetch: async (req, server) => {
@@ -109,6 +118,12 @@ export const withHtmlLiveReload = <
       open: async (ws) => {
         globalThis.ws = ws;
         await serveOptions.websocket?.open?.(ws);
+
+        if (watcher)
+          watcher.on("change", async () => {
+            if (buildConfig) await Bun.build(buildConfig);
+            ws.send(reloadCommand);
+          });
       },
     },
   };
