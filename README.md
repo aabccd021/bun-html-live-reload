@@ -1,4 +1,5 @@
 # bun-html-live-reload
+
 HTML live reload for Bun
 
 ## Getting Started
@@ -34,13 +35,14 @@ bun add --development github:aabccd021/bun-html-live-reload
 ## Options
 
 ### `wsPath`
+
 URL path used for websocket connection.
 
 This library relies on websocket to live reload an HTML.
 The path `wsPath` will be used to upgrade HTTP connection to websocket one.
 
-For example, the default `wsPath` value `__bun_live_reload_websocket__`, 
-will upgrade `http://localhost:3000/__bun_live_reload_websocket__` 
+For example, the default `wsPath` value `__bun_live_reload_websocket__`,
+will upgrade `http://localhost:3000/__bun_live_reload_websocket__`
 to `ws://localhost:3000/__bun_live_reload_websocket__`.
 
 ```ts
@@ -58,3 +60,23 @@ export default withHtmlLiveReload(
 );
 ```
 
+### React HMR: `watchPath` and `buildConfig`
+
+The `watchPath` is the file or folder path that should be watched to trigger the reloads. This could be used to reload html files on changing files in other folders like `src` for react projects.
+
+The `buildConfig` is used for running the `Bun.build()` command when the files in the `watchPath` change. The `Bun.build()` command will always be run once before starting the server.
+
+```ts
+export default withHtmlLiveReload(
+  {
+    ...
+  },
+  {
+    watchPath: path.resolve(import.meta.dir, "src"),
+    buildConfig: {
+      entrypoints: ["./src/index.tsx"],
+      outdir: "./build"
+    }
+  }
+);
+```
