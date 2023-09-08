@@ -2,9 +2,10 @@
 
 HTML live reload for Bun
 
-## Install
-```
-bun install git@github.com:aabccd021/bun-html-live-reload.git
+## Installation
+
+```sh
+bun add -d bun-html-live-reload
 ```
 
 ## Getting Started
@@ -30,12 +31,6 @@ export default withHtmlLiveReload({
 
 This plugin relies on response header to identify html file,
 so don't forget to add `{ headers: { "Content-Type": "text/html" }, }` to your `Response`.
-
-## Installation
-
-```sh
-bun add --development github:aabccd021/bun-html-live-reload
-```
 
 ## Options
 
