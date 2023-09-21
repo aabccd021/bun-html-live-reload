@@ -103,7 +103,7 @@ export const withHtmlLiveReload = <
 
       const response = await serveOptions.fetch(req, server);
 
-      if (response.headers.get("Content-Type") !== "text/html") {
+      if (!response.headers.get("Content-Type")?.startsWith("text/html")) {
         return response;
       }
 
