@@ -78,7 +78,6 @@ export const withHtmlLiveReload = <
 ): WebSocketServeOptions<WebSocketDataType> => {
   const port = serveOptions.port ?? "3000";
   const wsPath = options?.wsPath ?? "__bun_live_reload_websocket__";
-  const wsUrl = (hostname: string) => `${hostname}:${port}/${wsPath}`;
 
   const { buildConfig, watchPath } = options ?? {};
   if (buildConfig) Bun.build(buildConfig);
@@ -88,7 +87,8 @@ export const withHtmlLiveReload = <
   return {
     ...serveOptions,
     fetch: async (req, server) => {
-      if (req.url === `http://${wsUrl(server.hostname)}`) {
+      const wsUrl = `${server.hostname}:${port}/${wsPath}`;
+      if (req.url === `http://${wsUrl}`) {
         const upgraded = server.upgrade(req);
 
         if (!upgraded) {
@@ -107,7 +107,7 @@ export const withHtmlLiveReload = <
       }
 
       const originalHtml = await response.text();
-      const liveReloadScript = makeLiveReloadScript(wsUrl(server.hostname));
+      const liveReloadScript = makeLiveReloadScript(wsUrl);
       const htmlWithLiveReload = originalHtml + liveReloadScript;
 
       return new Response(htmlWithLiveReload, response);
