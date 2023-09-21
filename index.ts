@@ -76,7 +76,6 @@ export const withHtmlLiveReload = <
   serveOptions: T,
   options?: LiveReloadOptions
 ): WebSocketServeOptions<WebSocketDataType> => {
-  const port = serveOptions.port ?? "3000";
   const wsPath = options?.wsPath ?? "__bun_live_reload_websocket__";
 
   const { buildConfig, watchPath } = options ?? {};
@@ -87,7 +86,7 @@ export const withHtmlLiveReload = <
   return {
     ...serveOptions,
     fetch: async (req, server) => {
-      const wsUrl = `${server.hostname}:${port}/${wsPath}`;
+      const wsUrl = `${server.hostname}:${server.port}/${wsPath}`;
       if (req.url === `http://${wsUrl}`) {
         const upgraded = server.upgrade(req);
 
