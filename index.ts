@@ -86,8 +86,8 @@ export const withHtmlLiveReload = <
   return {
     ...serveOptions,
     fetch: async (req, server) => {
-      const wsUrl = `${server.hostname}:${server.port}/${wsPath}`;
-      if (req.url === `http://${wsUrl}`) {
+      const reqUrl = new URL(req.url);
+      if (reqUrl.pathname === '/' + wsPath) {
         const upgraded = server.upgrade(req);
 
         if (!upgraded) {
@@ -106,7 +106,7 @@ export const withHtmlLiveReload = <
       }
 
       const originalHtml = await response.text();
-      const liveReloadScript = makeLiveReloadScript(wsUrl);
+      const liveReloadScript = makeLiveReloadScript(`${reqUrl.host}/${wsPath}`);
       const htmlWithLiveReload = originalHtml + liveReloadScript;
 
       return new Response(htmlWithLiveReload, response);
