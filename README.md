@@ -60,11 +60,13 @@ export default withHtmlLiveReload(
 );
 ```
 
-### React HMR: `watchPath` and `buildConfig`
+### React HMR: `watchPath`, `buildConfig`, and `onChange`
 
 The `watchPath` is the file or folder path that should be watched to trigger the reloads. This could be used to reload html files on changing files in other folders like `src` for react projects.
 
 The `buildConfig` is used for running the `Bun.build()` command when the files in the `watchPath` change. The `Bun.build()` command will always be run once before starting the server.
+
+The `onChange` is a function which runs before `Bun.build()` when using `buildConfig` when the files in `watchPath` change. This command does not run at start.
 
 ```ts
 export default withHtmlLiveReload(
@@ -76,6 +78,9 @@ export default withHtmlLiveReload(
     buildConfig: {
       entrypoints: ["./src/index.tsx"],
       outdir: "./build"
+    },
+    onChange: async () => {
+      await $`rm -r ./dist`
     }
   }
 );

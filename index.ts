@@ -47,6 +47,7 @@ export type LiveReloadOptions = {
   readonly wsPath?: string;
   readonly buildConfig?: BuildConfig;
   readonly watchPath?: string;
+  readonly onChange?: () => Promise<void> | void;
 };
 
 /**
@@ -78,7 +79,7 @@ export const withHtmlLiveReload = <
 ): WebSocketServeOptions<WebSocketDataType> => {
   const wsPath = options?.wsPath ?? "__bun_live_reload_websocket__";
 
-  const { buildConfig, watchPath } = options ?? {};
+  const { buildConfig, watchPath, onChange } = options ?? {};
   if (buildConfig) Bun.build(buildConfig);
   let watcher: FSWatcher;
   if (watchPath) watcher = watch(watchPath);
@@ -105,11 +106,19 @@ export const withHtmlLiveReload = <
         return response;
       }
 
-      const originalHtml = await response.text();
       const liveReloadScript = makeLiveReloadScript(`${reqUrl.host}/${wsPath}`);
-      const htmlWithLiveReload = originalHtml + liveReloadScript;
 
-      return new Response(htmlWithLiveReload, response);
+      const rewriter = new HTMLRewriter();
+      rewriter.onDocument({
+        end(end) {
+          end.append(liveReloadScript, {
+            html: true
+          });
+        },
+      })
+
+      const output = rewriter.transform(response);
+      return new Response(await output.blob(), output);
     },
     websocket: {
       ...serveOptions.websocket,
@@ -119,6 +128,7 @@ export const withHtmlLiveReload = <
 
         if (watcher)
           watcher.on("change", async () => {
+            if (onChange) await onChange();
             if (buildConfig) await Bun.build(buildConfig);
             ws.send(reloadCommand);
           });
