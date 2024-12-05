@@ -2,86 +2,135 @@
 
 HTML live reload for Bun
 
-## Installation
+## Getting Started
 
 ```sh
 bun add -d bun-html-live-reload
 ```
 
-## Getting Started
-
 ```ts
 // example.ts
 import { withHtmlLiveReload } from "bun-html-live-reload";
 
-export default withHtmlLiveReload({
-  fetch: () => {
+Bun.serve({
+  fetch: withHtmlLiveReload(async (request) => {
     return new Response("<div>hello world</div>", {
       headers: { "Content-Type": "text/html" },
     });
-  },
+  }),
 });
 ```
 
-- Wrap your regular [hot reloading Bun server](https://bun.sh/docs/runtime/hot#http-servers) with `withHtmlLiveReload`.
 - Run the server with `bun --hot example.ts`, open browser, and try to edit the `hello world` part.
 - The page should live reload as you edit!
-
-## Response Header
-
-This plugin relies on response header to identify html file,
-so don't forget to add `{ headers: { "Content-Type": "text/html" }, }` to your `Response`.
+- This plugin relies on response header to identify html response,
+  so don't forget to add `"Content-Type": "text/html"` header to your `Response`.
 
 ## Options
 
-### `wsPath`
+### `eventPath` and `scriptPath`
 
-URL path used for websocket connection.
-
-This library relies on websocket to live reload an HTML.
-The path `wsPath` will be used to upgrade HTTP connection to websocket one.
-
-For example, the default `wsPath` value `__bun_live_reload_websocket__`,
-will upgrade `http://localhost:3000/__bun_live_reload_websocket__`
-to `ws://localhost:3000/__bun_live_reload_websocket__`.
+You can specify URL paths used for server-sent events and live reloader script.
 
 ```ts
-export default withHtmlLiveReload(
-  {
-    fetch: () => {
-      return new Response("<div>hello world</div>", {
-        headers: { "Content-Type": "text/html" },
-      });
+Bun.serve({
+  fetch: withHtmlLiveReload(
+    async (request) => {
+      /* ... */
     },
-  },
-  {
-    wsPath: "your_ws_path",
-  }
+    {
+      // SSE Path
+      // default: "/__dev__/reload"
+      eventPath: "/__reload",
+
+      // Live reload script path
+      // default: "/__dev__/reload.js"
+      scriptPath: "/__reload.js",
+    },
+  ),
+});
+```
+
+## Manually reload clients
+
+You can manually reload clients (refresh tabs) by calling `reloadClients` function.
+
+```ts
+import { withHtmlLiveReload, reloadClients } from "bun-html-live-reload";
+
+Bun.serve({
+  fetch: withHtmlLiveReload(async (request) => {
+    /* ... */
+  }),
+});
+
+// reload clients every second
+setInterval(() => {
+  reloadClients();
+}, 1000);
+```
+
+# Changes from v0.1
+
+- Messages are sent through SSE (HTTP streaming) instead of Websocket.
+- Wraps only `fetch` function instead of the whole server.
+- Exposes `reloadClients` function to manually reload clients.
+- Uses separate javascript file instead of inline script to comply with strict CSP.
+- Supports multiple clients (tabs).
+- Added tests
+
+# Migration from v0.1
+
+## v0.1
+
+```ts
+import { withHtmlLiveReload } from "bun-html-live-reload";
+import { $ } from "bun";
+
+export default Bun.serve(
+  withHtmlLiveReload(
+    {
+      fetch: (request) => {
+        /* ... */
+      },
+    },
+    {
+      watchPath: path.resolve(import.meta.dir, "src"),
+      buildConfig: {
+        entrypoints: ["./src/index.tsx"],
+        outdir: "./build",
+      },
+      onChange: async () => {
+        await $`rm -r ./dist`;
+      },
+    },
+  ),
 );
 ```
 
-### React HMR: `watchPath`, `buildConfig`, and `onChange`
-
-The `watchPath` is the file or folder path that should be watched to trigger the reloads. This could be used to reload html files on changing files in other folders like `src` for react projects.
-
-The `buildConfig` is used for running the `Bun.build()` command when the files in the `watchPath` change. The `Bun.build()` command will always be run once before starting the server.
-
-The `onChange` is a function which runs before `Bun.build()` when using `buildConfig` when the files in `watchPath` change. This command does not run at start.
+## v1.0
 
 ```ts
-export default withHtmlLiveReload(
-  {
-    ...
-  },
-  {
-    watchPath: path.resolve(import.meta.dir, "src"),
-    buildConfig: {
-      entrypoints: ["./src/index.tsx"],
-      outdir: "./build"
-    },
-    onChange: async () => {
-      await $`rm -r ./dist`
-    }
-  }
-);
+import { withHtmlLiveReload, reloadClients } from "bun-html-live-reload";
+import { FSWatcher, watch } from "fs";
+import { $ } from "bun";
+
+const buildConfig = {
+  entrypoints: ["./src/index.tsx"],
+  outdir: "./build",
+};
+
+Bun.build(buildConfig);
+
+watch(path.resolve(import.meta.url, "src")).on("change", async () => {
+  await $`rm -r ./dist`;
+  await Bun.build(buildConfig);
+  reloadClients();
+});
+
+Bun.serve({
+  fetch: withHtmlLiveReload(async (request) => {
+    /* ... */
+  }),
+});
 ```

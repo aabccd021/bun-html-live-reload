@@ -1,14 +1,9 @@
-import { withHtmlLiveReload } from "./index.js";
+import { withHtmlLiveReload } from "./index.ts";
 
-export default withHtmlLiveReload(
-  {
-    fetch: () => {
-      return new Response("<div>hello world</div>", {
-        headers: { "Content-Type": "text/html" },
-      });
-    },
-  },
-  {
-    wsPath: "your_ws_path",
-  }
-);
+Bun.serve({
+  fetch: withHtmlLiveReload(async () => {
+    return new Response("<div>Init</div>", {
+      headers: { "Content-Type": "text/html" },
+    });
+  }),
+});

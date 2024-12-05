@@ -1,0 +1,27 @@
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: HatsuneMiku3939/direnv-action@v1
+
+      - run: bun install
+
+      - run: bun run prettier-check
+
+      - run: bun run typescript-check
+
+      - run: bun test/reloads.ts
+
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}

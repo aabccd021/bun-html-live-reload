@@ -1,17 +1,11 @@
 {
   "name": "bun-html-live-reload",
   "description": "HTML live reload for Bun",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "module": "index.ts",
   "type": "module",
   "author": "aabccd021",
   "license": "MIT",
-  "eslintConfig": {
-    "extends": [
-      "plugin:prettier/recommended"
-    ],
-    "parser": "@typescript-eslint/parser"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aabccd021/bun-html-live-reload.git"
@@ -29,16 +23,13 @@
     "index.ts"
   ],
   "scripts": {
-    "start": "bun --hot example.ts",
-    "lint": "eslint . --ext ts"
+    "prettier-check": "prettier --check .",
+    "typescript-check": "tsc"
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "^5.54.0",
-    "bun-types": "^0.7.3",
-    "eslint": "^8.35.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.8.4",
-    "typescript": "^4.9.5"
+    "@types/bun": "^1.1.14",
+    "playwright": "1.47.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   }
 }

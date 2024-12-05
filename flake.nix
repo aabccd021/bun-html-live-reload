@@ -3,11 +3,21 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = { self, nixpkgs }: with nixpkgs.legacyPackages.x86_64-linux; {
-    devShell.x86_64-linux = mkShellNoCC {
+  outputs = { nixpkgs, ... }: 
+  let
+    pkgs = nixpkgs.legacyPackages.x86_64-linux;
+
+  in
+  {
+
+    devShells.x86_64-linux.default = pkgs.mkShellNoCC {
+      shellHook = ''
+        export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers-chromium}
+      '';
       buildInputs = [
-        bun
+        pkgs.bun
       ];
     };
+
   };
 }
