@@ -1,7 +1,7 @@
 {
   "name": "bun-html-live-reload",
   "description": "HTML live reload for Bun",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "module": "index.ts",
   "type": "module",
   "author": "aabccd021",
