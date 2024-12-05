@@ -21,7 +21,3 @@ jobs:
       - run: bun run typescript-check
 
       - run: bun test/reloads.ts
-
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
