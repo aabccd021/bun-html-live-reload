@@ -1,19 +1,13 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "checkJs": true,
-    "downlevelIteration": true,
-    "esModuleInterop": true,
-    "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "esNext"
-    ],
-    "module": "esnext",
-    "moduleResolution": "nodenext",
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -23,9 +17,8 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext",
-    "types": [
-      "bun-types"
-    ]
+    "target": "ESNext",
+    "types": ["bun-types"],
+    "verbatimModuleSyntax": true
   }
 }

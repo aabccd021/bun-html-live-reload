@@ -1,138 +1,109 @@
-import type {
-  Server,
-  ServerWebSocket,
-  WebSocketHandler,
-  WebSocketServeOptions,
-  BuildConfig,
-} from "bun";
-import { FSWatcher, watch } from "fs";
-
 declare global {
-  var ws: ServerWebSocket<unknown> | undefined;
+  var clients: Set<ReadableStreamDefaultController> | undefined;
 }
 
-const reloadCommand = "reload";
+globalThis.clients ??= new Set<ReadableStreamDefaultController>();
 
-globalThis.ws?.send(reloadCommand);
+export function reloadClients(): void {
+  if (globalThis.clients !== undefined) {
+    for (const client of globalThis.clients) {
+      client.enqueue(`data: RELOAD\n\n`);
+    }
+  }
+}
 
-const makeLiveReloadScript = (wsUrl: string) => `
-<!-- start bun live reload script -->
-<script type="text/javascript">
-  (function() {
-    const socket = new WebSocket("ws://${wsUrl}");
-      socket.onmessage = function(msg) {
-      if(msg.data === '${reloadCommand}') {
-        location.reload()
-      }
-    };
-    console.log('Live reload enabled.');
-  })();
-</script>
-<!-- end bun live reload script -->
-`;
-
-export type PureWebSocketServeOptions<WebSocketDataType> = Omit<
-  WebSocketServeOptions<WebSocketDataType>,
-  "fetch" | "websocket"
-> & {
-  fetch(request: Request, server: Server): Promise<Response> | Response;
-  websocket?: WebSocketHandler<WebSocketDataType>;
-};
+reloadClients();
 
 export type LiveReloadOptions = {
   /**
-   * URL path used for websocket connection
-   * @default "__bun_live_reload_websocket__"
+   * URL path used for server-sent events
+   * @default "__dev__/reload"
    */
-  readonly wsPath?: string;
-  readonly buildConfig?: BuildConfig;
-  readonly watchPath?: string;
-  readonly onChange?: () => Promise<void> | void;
+  readonly eventPath?: string;
+
+  /**
+   * URL path used for live reload script
+   * @default "__dev__/ws"
+   */
+  readonly scriptPath?: string;
 };
+
+type Fetch = (req: Request) => Promise<Response>;
 
 /**
  * Automatically reload html when Bun server hot reloads
  *
- * @param serverOptions Bun's server options
+ * @param fetch Bun server's fetch function
  * @param options Live reload options
  *
- * @returns Bun's server with provided options that live reloads HTML
- *
- * @example
- *```ts
- *import { withHtmlLiveReload } from "bun-html-live-reload";
- *
- *export default withHtmlLiveReload({
- *  fetch: () => {
- *    return new Response("<div>hello world</div>", {
- *      headers: { "Content-Type": "text/html" },
- *    });
- *  },
- *});
+ * @returns fetch function with live reload
  */
-export const withHtmlLiveReload = <
-  WebSocketDataType,
-  T extends PureWebSocketServeOptions<WebSocketDataType>
->(
-  serveOptions: T,
-  options?: LiveReloadOptions
-): WebSocketServeOptions<WebSocketDataType> => {
-  const wsPath = options?.wsPath ?? "__bun_live_reload_websocket__";
+export function withHtmlLiveReload(
+  handler: Fetch,
+  options?: {
+    eventPath?: string;
+    scriptPath?: string;
+  },
+): Fetch {
+  return async (req) => {
+    if (req.method !== "GET") {
+      return handler(req);
+    }
 
-  const { buildConfig, watchPath, onChange } = options ?? {};
-  if (buildConfig) Bun.build(buildConfig);
-  let watcher: FSWatcher;
-  if (watchPath) watcher = watch(watchPath);
+    const requestUrl = new URL(req.url);
 
-  return {
-    ...serveOptions,
-    fetch: async (req, server) => {
-      const reqUrl = new URL(req.url);
-      if (reqUrl.pathname === '/' + wsPath) {
-        const upgraded = server.upgrade(req);
+    const { eventPath, scriptPath } = {
+      eventPath: "/__dev__/reload",
+      scriptPath: "/__dev__/reload.js",
+      ...options,
+    };
 
-        if (!upgraded) {
-          return new Response(
-            "Failed to upgrade websocket connection for live reload",
-            { status: 400 }
-          );
-        }
-        return;
-      }
-
-      const response = await serveOptions.fetch(req, server);
-
-      if (!response.headers.get("Content-Type")?.startsWith("text/html")) {
-        return response;
-      }
-
-      const liveReloadScript = makeLiveReloadScript(`${reqUrl.host}/${wsPath}`);
-
-      const rewriter = new HTMLRewriter();
-      rewriter.onDocument({
-        end(end) {
-          end.append(liveReloadScript, {
-            html: true
+    if (requestUrl.pathname === eventPath) {
+      const stream = new ReadableStream({
+        start(controller): void {
+          globalThis.clients?.add(controller);
+          req.signal.addEventListener("abort", () => {
+            controller.close();
+            globalThis.clients?.delete(controller);
           });
         },
+      });
+
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+        },
+      });
+    }
+
+    if (requestUrl.pathname === scriptPath) {
+      return new Response(
+        `new EventSource("${eventPath}").onmessage = function(msg) {  
+          if(msg.data === 'RELOAD') { location.reload(); }
+         };`,
+        { headers: { "Content-Type": "text/javascript" } },
+      );
+    }
+
+    const response = await handler(req);
+
+    const contentType = response.headers.get("Content-Type");
+    const isResponseHtml = contentType?.startsWith("text/html") ?? false;
+    if (!isResponseHtml) {
+      return response;
+    }
+
+    const liveReloadScript = `<script type="module" src="${scriptPath}"></script>`;
+
+    const output = new HTMLRewriter()
+      .onDocument({
+        end: (el) => {
+          el.append(liveReloadScript, { html: true });
+        },
       })
+      .transform(response);
 
-      const output = rewriter.transform(response);
-      return new Response(await output.blob(), output);
-    },
-    websocket: {
-      ...serveOptions.websocket,
-      open: async (ws) => {
-        globalThis.ws = ws;
-        await serveOptions.websocket?.open?.(ws);
-
-        if (watcher)
-          watcher.on("change", async () => {
-            if (onChange) await onChange();
-            if (buildConfig) await Bun.build(buildConfig);
-            ws.send(reloadCommand);
-          });
-      },
-    },
+    return new Response(await output.blob(), output);
   };
-};
+}
