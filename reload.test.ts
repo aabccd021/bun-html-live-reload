@@ -29,7 +29,7 @@ let close: () => Promise<void> | undefined;
 
 afterEach(async () => {
   await close?.();
-})
+});
 
 test("hot reload works", async () => {
   const systemTmp = process.env["TMPDIR"] ?? "/tmp";
