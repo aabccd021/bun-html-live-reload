@@ -16,6 +16,8 @@
       '';
       buildInputs = [
         pkgs.bun
+        pkgs.biome
+        pkgs.typescript
       ];
     };
 

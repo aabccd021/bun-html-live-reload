@@ -22,14 +22,8 @@
   "files": [
     "index.ts"
   ],
-  "scripts": {
-    "prettier-check": "prettier --check .",
-    "typescript-check": "tsc"
-  },
   "devDependencies": {
     "@types/bun": "^1.1.14",
-    "playwright": "1.47.2",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "playwright": "1.47.2"
   }
 }

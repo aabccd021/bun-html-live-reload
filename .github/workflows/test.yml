@@ -16,8 +16,8 @@ jobs:
 
       - run: bun install
 
-      - run: bun run prettier-check
+      - run: tsc
 
-      - run: bun run typescript-check
+      - run: biome check --error-on-warnings
 
       - run: bun test
