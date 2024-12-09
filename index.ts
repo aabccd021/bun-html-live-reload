@@ -7,7 +7,7 @@ globalThis.clients ??= new Set<ReadableStreamDefaultController>();
 export function reloadClients(): void {
   if (globalThis.clients !== undefined) {
     for (const client of globalThis.clients) {
-      client.enqueue(`data: RELOAD\n\n`);
+      client.enqueue("data: RELOAD\n\n");
     }
   }
 }
@@ -45,7 +45,7 @@ export function withHtmlLiveReload(
     scriptPath?: string;
   },
 ): Fetch {
-  return async (req) => {
+  return async (req): Promise<Response> => {
     if (req.method !== "GET") {
       return handler(req);
     }
@@ -98,7 +98,7 @@ export function withHtmlLiveReload(
 
     const output = new HTMLRewriter()
       .onDocument({
-        end: (el) => {
+        end: (el): void => {
           el.append(liveReloadScript, { html: true });
         },
       })

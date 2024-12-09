@@ -1,6 +1,6 @@
-import { chromium } from "playwright";
-import * as fs from "fs";
 import { afterEach, expect, test } from "bun:test";
+import { copyFileSync, mkdtempSync } from "node:fs";
+import { chromium } from "playwright";
 
 const serverCodeInit = `
 import { withHtmlLiveReload } from "./bun-html-live-reload.ts";
@@ -33,19 +33,19 @@ afterEach(async () => {
 
 test("hot reload works", async () => {
   const systemTmp = process.env["TMPDIR"] ?? "/tmp";
-  const tmpdir = fs.mkdtempSync(`${systemTmp}/bun-`);
+  const tmpdir = mkdtempSync(`${systemTmp}/bun-`);
   const serverPath = `${tmpdir}/server.ts`;
   const libPath = `${tmpdir}/bun-html-live-reload.ts`;
 
   await Bun.write(serverPath, serverCodeInit);
 
-  fs.copyFileSync(`${import.meta.dir}/index.ts`, libPath);
+  copyFileSync(`${import.meta.dir}/index.ts`, libPath);
 
   const child = Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
 
   const browser = await chromium.launch();
 
-  close = async () => {
+  close = async (): Promise<void> => {
     child?.kill();
     await browser.close();
   };

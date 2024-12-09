@@ -12,6 +12,9 @@
   "organizeImports": {
     "enabled": true
   },
+  "javascript": {
+    "globals": ["HTMLRewriter", "Bun"]
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -25,16 +28,19 @@
         "all": true
       },
       "complexity": {
-        "all": true
+        "all": true,
+        "useLiteralKeys": "off"
       },
       "suspicious": {
         "all": true
       },
       "correctness": {
-        "all": true
+        "all": true,
+        "noNodejsModules": "off"
       },
       "nursery": {
-        "all": true
+        "all": true,
+        "noProcessEnv": "off"
       },
       "style": {
         "all": true
