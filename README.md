@@ -28,8 +28,6 @@ Bun.serve({
 
 ## Options
 
-### `eventPath` and `scriptPath`
-
 You can specify URL paths used for server-sent events and live reloader script.
 
 ```ts
@@ -46,6 +44,11 @@ Bun.serve({
       // Live reload script path
       // default: "/__dev__/reload.js"
       scriptPath: "/__reload.js",
+
+      // Wether to enable auto reload.
+      // If false, you need to manually call `reloadClients` function to reload clients.
+      // default: true
+      autoReload: false
     },
   ),
 });
@@ -53,7 +56,8 @@ Bun.serve({
 
 ## Manually reload clients
 
-You can manually reload clients (refresh tabs) by calling `reloadClients` function.
+You can manually reload clients (refresh tabs) by calling `reloadClients` function,
+in addition to auto reload feature.
 
 ```ts
 import { withHtmlLiveReload, reloadClients } from "bun-html-live-reload";

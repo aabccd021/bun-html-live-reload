@@ -14,6 +14,8 @@ jobs:
 
       - uses: HatsuneMiku3939/direnv-action@v1
 
+      - run: nix flake check
+
       - run: bun install
 
       - run: tsc
