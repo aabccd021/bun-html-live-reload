@@ -9,8 +9,19 @@ Bun.serve({
   fetch: withHtmlLiveReload(async () => {
     return new Response("<div>Init</div>", {
       headers: { "Content-Type": "text/html" },
-    }, { autoReload: false });
-  }),
+    });
+  }, { autoReload: false })
+});
+`;
+
+const serverCodeChanged = `
+import { withHtmlLiveReload } from "./bun-html-live-reload.ts";
+Bun.serve({
+  fetch: withHtmlLiveReload(async () => {
+    return new Response("<div>Changed</div>", {
+      headers: { "Content-Type": "text/html" },
+    }),
+  }, { autoReload: false })
 });
 `;
 
@@ -45,8 +56,8 @@ test("can disable auto reload", async () => {
 
   expect(await page.innerText("div")).toBe("Init");
 
-  await Bun.write(serverPath, serverCodeInit);
-  await page.waitForEvent("framenavigated");
+  await Bun.write(serverPath, serverCodeChanged);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   expect(await page.innerText("div")).toBe("Init");
 });
