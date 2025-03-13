@@ -1,3 +1,4 @@
 .direnv
+.gcroot
 node_modules
 result
