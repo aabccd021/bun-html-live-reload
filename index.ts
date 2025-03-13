@@ -104,14 +104,12 @@ export function withHtmlLiveReload(
 
     const liveReloadScript = `<script type="module" src="${scriptPath}"></script>`;
 
-    const output = new HTMLRewriter()
+    return new HTMLRewriter()
       .onDocument({
         end: (el): void => {
           el.append(liveReloadScript, { html: true });
         },
       })
       .transform(response);
-
-    return new Response(await output.blob(), output);
   };
 }

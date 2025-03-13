@@ -48,7 +48,7 @@ Bun.serve({
       // Wether to enable auto reload.
       // If false, you need to manually call `reloadClients` function to reload clients.
       // default: true
-      autoReload: false
+      autoReload: false,
     },
   ),
 });

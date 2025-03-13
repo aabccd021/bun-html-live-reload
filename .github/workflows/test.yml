@@ -8,18 +8,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
+      - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-
-      - uses: HatsuneMiku3939/direnv-action@v1
-
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flake-checker-action@main
       - run: nix flake check
-
-      - run: bun install
-
-      - run: tsc
-
-      - run: biome check --error-on-warnings
-
-      - run: bun test

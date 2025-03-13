@@ -10,7 +10,7 @@ Bun.serve({
     return new Response("<div>Init</div>", {
       headers: { "Content-Type": "text/html" },
     });
-  }, { autoReload: false })
+  }),
 });
 `;
 
@@ -20,8 +20,8 @@ Bun.serve({
   fetch: withHtmlLiveReload(async () => {
     return new Response("<div>Changed</div>", {
       headers: { "Content-Type": "text/html" },
-    }),
-  }, { autoReload: false })
+    });
+  }),
 });
 `;
 
@@ -31,7 +31,7 @@ afterEach(async () => {
   await close?.();
 });
 
-test("can disable auto reload", async () => {
+test("hot reload works", async () => {
   const systemTmp = process.env["TMPDIR"] ?? "/tmp";
   const tmpdir = mkdtempSync(`${systemTmp}/bun-`);
   const serverPath = `${tmpdir}/server.ts`;
@@ -39,7 +39,7 @@ test("can disable auto reload", async () => {
 
   await Bun.write(serverPath, serverCodeInit);
 
-  copyFileSync(`${import.meta.dir}/index.ts`, libPath);
+  copyFileSync(`${import.meta.dir}/../index.ts`, libPath);
 
   const child = Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
 
@@ -57,7 +57,7 @@ test("can disable auto reload", async () => {
   expect(await page.innerText("div")).toBe("Init");
 
   await Bun.write(serverPath, serverCodeChanged);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await page.waitForEvent("framenavigated");
 
-  expect(await page.innerText("div")).toBe("Init");
+  expect(await page.innerText("div")).toBe("Changed");
 });
