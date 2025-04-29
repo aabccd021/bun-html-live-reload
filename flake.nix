@@ -59,7 +59,7 @@
         withChromiumHeadlessShell = true;
       };
 
-      tests = pkgs.runCommand "tests"
+      mkTest = testFile: pkgs.runCommand "tests"
         {
           buildInputs = [ pkgs.bun pkgs.musl ];
           env.PLAYWRIGHT_BROWSERS_PATH = browsers;
@@ -69,7 +69,7 @@
         cp -L ${./package.json} ./package.json
         cp -L ${./tsconfig.json} ./tsconfig.json
         cp -Lr ${nodeModules}/node_modules ./node_modules
-        bun test
+        bun test ./test/${testFile}.test.ts
         touch $out
       '';
 
@@ -110,7 +110,8 @@
         biome = biome;
         nodeModules = nodeModules;
         publish = publish;
-        tests = tests;
+        test-no-autoreload = mkTest "no-autoreload";
+        test-reload = mkTest "reload";
         bun2nix = inputs.bun2nix.packages.x86_64-linux.default;
       };
 

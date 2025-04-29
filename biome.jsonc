@@ -43,7 +43,8 @@
         "noProcessEnv": "off"
       },
       "style": {
-        "all": true
+        "all": true,
+        "noNamespaceImport": "off"
       }
     }
   }

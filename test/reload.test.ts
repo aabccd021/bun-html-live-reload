@@ -1,5 +1,5 @@
-import { afterEach, expect, test } from "bun:test";
-import { copyFileSync, mkdtempSync } from "node:fs";
+import { expect, test } from "bun:test";
+import * as fs from "node:fs";
 import { chromium } from "playwright";
 
 const serverCodeInit = `
@@ -25,30 +25,21 @@ Bun.serve({
 });
 `;
 
-let close: () => Promise<void> | undefined;
-
-afterEach(async () => {
-  await close?.();
-});
-
 test("hot reload works", async () => {
   const systemTmp = process.env["TMPDIR"] ?? "/tmp";
-  const tmpdir = mkdtempSync(`${systemTmp}/bun-`);
+  const tmpdir = fs.mkdtempSync(`${systemTmp}/bun-`);
   const serverPath = `${tmpdir}/server.ts`;
-  const libPath = `${tmpdir}/bun-html-live-reload.ts`;
 
   await Bun.write(serverPath, serverCodeInit);
 
-  copyFileSync(`${import.meta.dir}/../index.ts`, libPath);
+  fs.copyFileSync(
+    `${import.meta.dir}/../index.ts`,
+    `${tmpdir}/bun-html-live-reload.ts`,
+  );
 
-  const child = Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
+  Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
 
   const browser = await chromium.launch({});
-
-  close = async (): Promise<void> => {
-    child?.kill();
-    await browser.close();
-  };
 
   const context = await browser.newContext();
   const page = await context.newPage();
