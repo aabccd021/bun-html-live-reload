@@ -1,18 +1,26 @@
 {
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    treefmt-nix.url = "github:numtide/treefmt-nix";
-    build-node-modules.url = "github:aabccd021/build-node-modules";
-  };
 
+  nixConfig.allow-import-from-derivation = false;
+  nixConfig.extra-substituters = [
+    "https://cache.garnix.io"
+    "https://nix-community.cachix.org"
+  ];
+  nixConfig.extra-trusted-public-keys = [
+    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+    "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+  ];
 
-  outputs = { self, nixpkgs, treefmt-nix, build-node-modules }:
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+  inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
+  inputs.bun2nix.url = "github:baileyluTCD/bun2nix";
+
+  outputs = { self, ... }@inputs:
     let
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
 
-      nodeModules = build-node-modules.lib.buildNodeModules pkgs ./package.json ./package-lock.json;
+      nodeModules = inputs.bun2nix.lib.x86_64-linux.mkBunNodeModules (import ./bun.nix);
 
-      treefmtEval = treefmt-nix.lib.evalModule pkgs {
+      treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.prettier.enable = true;
         programs.nixpkgs-fmt.enable = true;
@@ -27,7 +35,7 @@
         cp -L ${./index.ts} ./index.ts
         cp -Lr ${./test} ./test
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${nodeModules} ./node_modules
+        cp -Lr ${nodeModules}/node_modules ./node_modules
         ${pkgs.typescript}/bin/tsc
         touch $out
       '';
@@ -38,7 +46,7 @@
         cp -Lr ${./test} ./test
         cp -L ${./package.json} ./package.json
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${nodeModules} ./node_modules
+        cp -Lr ${nodeModules}/node_modules ./node_modules
         ${pkgs.biome}/bin/biome check --error-on-warnings
         touch $out
       '';
@@ -52,7 +60,7 @@
         cp -Lr ${./test} ./test
         cp -L ${./package.json} ./package.json
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${nodeModules} ./node_modules
+        cp -Lr ${nodeModules}/node_modules ./node_modules
         bun test
         touch $out
       '';
@@ -84,6 +92,7 @@
         nodeModules = nodeModules;
         publish = publish;
         tests = tests;
+        bun2nix = inputs.bun2nix.packages.x86_64-linux.default;
       };
 
       gcroot = packages // {
