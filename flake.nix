@@ -127,13 +127,7 @@
         default = gcroot;
       };
 
-
       formatter.x86_64-linux = treefmtEval.config.build.wrapper;
-
-      apps.x86_64-linux.publish = {
-        type = "app";
-        program = "${publish}/bin/publish";
-      };
 
       devShells.x86_64-linux.default = devShell;
     };
