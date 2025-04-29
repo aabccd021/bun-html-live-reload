@@ -51,10 +51,18 @@
         touch $out
       '';
 
+      browsers = pkgs.playwright.browsers.overrideAttrs {
+        withChromium = false;
+        withFirefox = false;
+        withWebkit = false;
+        withFfmpeg = false;
+        withChromiumHeadlessShell = true;
+      };
+
       tests = pkgs.runCommand "tests"
         {
           buildInputs = [ pkgs.bun pkgs.musl ];
-          env.PLAYWRIGHT_BROWSERS_PATH = pkgs.playwright.browsers;
+          env.PLAYWRIGHT_BROWSERS_PATH = browsers;
         } ''
         cp -L ${./index.ts} ./index.ts
         cp -Lr ${./test} ./test
@@ -87,7 +95,7 @@
 
       devShell = pkgs.mkShellNoCC {
         shellHook = ''
-          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright.browsers}
+          export PLAYWRIGHT_BROWSERS_PATH=${browsers}
         '';
         buildInputs = [
           pkgs.bun
