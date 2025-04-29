@@ -43,7 +43,7 @@ test("hot reload works", async () => {
 
   const child = Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({});
 
   close = async (): Promise<void> => {
     child?.kill();
@@ -54,10 +54,10 @@ test("hot reload works", async () => {
   const page = await context.newPage();
   await page.goto("http://localhost:3000");
 
-  expect(await page.innerText("div")).toBe("Init");
+  expect(await page.locator("div").textContent()).toBe("Init");
 
   await Bun.write(serverPath, serverCodeChanged);
   await page.waitForEvent("framenavigated");
 
-  expect(await page.innerText("div")).toBe("Changed");
+  expect(await page.locator("div").textContent()).toBe("Changed");
 });

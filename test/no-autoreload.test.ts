@@ -54,10 +54,10 @@ test("can disable auto reload", async () => {
   const page = await context.newPage();
   await page.goto("http://localhost:3000");
 
-  expect(await page.innerText("div")).toBe("Init");
+  expect(await page.locator("div").textContent()).toBe("Init");
 
   await Bun.write(serverPath, serverCodeChanged);
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  expect(await page.innerText("div")).toBe("Init");
+  expect(await page.locator("div").textContent()).toBe("Init");
 });

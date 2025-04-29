@@ -21,6 +21,6 @@
   },
   "devDependencies": {
     "@types/bun": "^1.1.14",
-    "playwright": "1.47.2"
+    "playwright": "1.50.1"
   }
 }

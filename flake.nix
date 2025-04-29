@@ -54,7 +54,7 @@
       tests = pkgs.runCommand "tests"
         {
           buildInputs = [ pkgs.bun pkgs.musl ];
-          env.PLAYWRIGHT_BROWSERS_PATH = pkgs.playwright-driver.browsers-chromium;
+          env.PLAYWRIGHT_BROWSERS_PATH = pkgs.playwright.browsers;
         } ''
         cp -L ${./index.ts} ./index.ts
         cp -Lr ${./test} ./test
@@ -85,6 +85,20 @@
         '';
       };
 
+      devShell = pkgs.mkShellNoCC {
+        shellHook = ''
+          export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright.browsers}
+        '';
+        buildInputs = [
+          pkgs.bun
+          pkgs.biome
+          pkgs.typescript
+          pkgs.vscode-langservers-extracted
+          pkgs.nixd
+          pkgs.typescript-language-server
+        ];
+      };
+
       packages = {
         formatting = treefmtEval.config.build.check self;
         tsc = tsc;
@@ -95,15 +109,16 @@
         bun2nix = inputs.bun2nix.packages.x86_64-linux.default;
       };
 
-      gcroot = packages // {
-        gcroot = pkgs.linkFarm "gcroot" packages;
-      };
     in
     {
 
-      checks.x86_64-linux = gcroot;
+      checks.x86_64-linux = packages;
 
-      packages.x86_64-linux = gcroot;
+      packages.x86_64-linux = packages // rec {
+        gcroot = pkgs.linkFarm "gcroot" packages;
+        default = gcroot;
+      };
+
 
       formatter.x86_64-linux = treefmtEval.config.build.wrapper;
 
@@ -111,5 +126,7 @@
         type = "app";
         program = "${publish}/bin/publish";
       };
+
+      devShells.x86_64-linux.default = devShell;
     };
 }
