@@ -4,7 +4,7 @@
     "": {
       "name": "bun-html-live-reload",
       "devDependencies": {
-        "@types/bun": "^1.1.14",
+        "@types/bun": "latest",
         "playwright": "1.50.1",
       },
     },

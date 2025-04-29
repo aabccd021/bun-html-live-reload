@@ -20,7 +20,7 @@
     "postinstall": "cd $(dirname $npm_package_json) && nix run .#bun2nix -- --output-file bun.nix"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.14",
+    "@types/bun": "latest",
     "playwright": "1.50.1"
   }
 }
