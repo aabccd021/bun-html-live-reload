@@ -21,6 +21,6 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "playwright": "1.50.1"
+    "playwright": "1.52.0"
   }
 }
