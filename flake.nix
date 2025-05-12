@@ -1,14 +1,6 @@
 {
 
   nixConfig.allow-import-from-derivation = false;
-  nixConfig.extra-substituters = [
-    "https://cache.garnix.io"
-    "https://nix-community.cachix.org"
-  ];
-  nixConfig.extra-trusted-public-keys = [
-    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-    "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-  ];
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
@@ -30,6 +22,8 @@
         settings.formatter.biome.priority = 2;
         settings.global.excludes = [ "LICENSE" "*.ico" ];
       };
+
+      formatter = treefmtEval.config.build.wrapper;
 
       tsc = pkgs.runCommand "tsc" { } ''
         cp -L ${./index.ts} ./index.ts
@@ -90,7 +84,7 @@
         '';
       };
 
-      devShell = pkgs.mkShellNoCC {
+      devShells.default = pkgs.mkShellNoCC {
         shellHook = ''
           export PLAYWRIGHT_BROWSERS_PATH=${browsers}
         '';
@@ -104,8 +98,9 @@
         ];
       };
 
-      packages = {
+      packages = devShells // {
         formatting = treefmtEval.config.build.check self;
+        formatter = formatter;
         tsc = tsc;
         biome = biome;
         nodeModules = nodeModules;
@@ -118,15 +113,15 @@
     in
     {
 
-      checks.x86_64-linux = packages;
-
       packages.x86_64-linux = packages // rec {
         gcroot = pkgs.linkFarm "gcroot" packages;
         default = gcroot;
       };
 
-      formatter.x86_64-linux = treefmtEval.config.build.wrapper;
+      checks.x86_64-linux = packages;
 
-      devShells.x86_64-linux.default = devShell;
+      formatter.x86_64-linux = formatter;
+
+      devShells.x86_64-linux = devShells;
     };
 }
