@@ -119,9 +119,7 @@
       };
 
       checks.x86_64-linux = packages;
-
       formatter.x86_64-linux = formatter;
-
       devShells.x86_64-linux = devShells;
     };
 }
