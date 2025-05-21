@@ -17,6 +17,7 @@
         projectRootFile = "flake.nix";
         programs.prettier.enable = true;
         programs.nixfmt.enable = true;
+        programs.nixfmt.strict = true;
         programs.biome.enable = true;
         programs.shfmt.enable = true;
         settings.formatter.prettier.priority = 1;
