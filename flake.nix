@@ -6,7 +6,8 @@
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
   inputs.bun2nix.url = "github:baileyluTCD/bun2nix";
 
-  outputs = { self, ... }@inputs:
+  outputs =
+    { self, ... }@inputs:
     let
       pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
 
@@ -15,12 +16,15 @@
       treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.prettier.enable = true;
-        programs.nixpkgs-fmt.enable = true;
+        programs.nixfmt.enable = true;
         programs.biome.enable = true;
         programs.shfmt.enable = true;
         settings.formatter.prettier.priority = 1;
         settings.formatter.biome.priority = 2;
-        settings.global.excludes = [ "LICENSE" "*.ico" ];
+        settings.global.excludes = [
+          "LICENSE"
+          "*.ico"
+        ];
       };
 
       formatter = treefmtEval.config.build.wrapper;
@@ -53,23 +57,33 @@
         withChromiumHeadlessShell = true;
       };
 
-      mkTest = testFile: pkgs.runCommand "tests"
-        {
-          buildInputs = [ pkgs.bun pkgs.musl ];
-          env.PLAYWRIGHT_BROWSERS_PATH = browsers;
-        } ''
-        cp -L ${./index.ts} ./index.ts
-        cp -Lr ${./test} ./test
-        cp -L ${./package.json} ./package.json
-        cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${nodeModules}/node_modules ./node_modules
-        bun test ./test/${testFile}.test.ts
-        touch $out
-      '';
+      mkTest =
+        testFile:
+        pkgs.runCommand "tests"
+          {
+            buildInputs = [
+              pkgs.bun
+              pkgs.musl
+            ];
+            env.PLAYWRIGHT_BROWSERS_PATH = browsers;
+          }
+          ''
+            cp -L ${./index.ts} ./index.ts
+            cp -Lr ${./test} ./test
+            cp -L ${./package.json} ./package.json
+            cp -L ${./tsconfig.json} ./tsconfig.json
+            cp -Lr ${nodeModules}/node_modules ./node_modules
+            bun test ./test/${testFile}.test.ts
+            touch $out
+          '';
 
       publish = pkgs.writeShellApplication {
         name = "publish";
-        runtimeInputs = [ pkgs.jq pkgs.bun pkgs.curl ];
+        runtimeInputs = [
+          pkgs.jq
+          pkgs.bun
+          pkgs.curl
+        ];
         text = ''
           repo_root=$(git rev-parse --show-toplevel)
           current_version=$(jq -r .version "$repo_root/package.json")
