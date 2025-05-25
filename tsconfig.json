@@ -4,7 +4,7 @@
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "lib": ["ESNext"],
-    "module": "ESNext",
+    "module": "Preserve",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
     "noEmit": true,
