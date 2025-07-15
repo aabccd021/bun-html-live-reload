@@ -29,18 +29,18 @@
     binaries = {
       "playwright" = "../playwright/cli.js";
     };
-    name = "playwright@1.52.0";
-    url = "https://registry.npmjs.org/playwright/-/playwright-1.52.0.tgz";
-    hash = "sha512-JAwMNMBlxJ2oD1kce4KPtMkDeKGHQstdpFPcPH3maElAXon/QZeTvtsfXmTMRyO9TslfoYOXkSsvao2nE1ilTw==";
+    name = "playwright@1.53.1";
+    url = "https://registry.npmjs.org/playwright/-/playwright-1.53.1.tgz";
+    hash = "sha512-LJ13YLr/ocweuwxyGf1XNFWIU4M2zUSo149Qbp+A4cpwDjsxRPj7k6H25LBrEHiEwxvRbD8HdwvQmRMSvquhYw==";
   };
   "playwright-core" = {
     out_path = "playwright-core";
     binaries = {
       "playwright-core" = "../playwright-core/cli.js";
     };
-    name = "playwright-core@1.52.0";
-    url = "https://registry.npmjs.org/playwright-core/-/playwright-core-1.52.0.tgz";
-    hash = "sha512-l2osTgLXSMeuLZOML9qYODUQoPPnUsKsb5/P6LJ2e6uPKXUdPK5WYhN4z03G+YNbWmGDY4YENauNu4ZKczreHg==";
+    name = "playwright-core@1.53.1";
+    url = "https://registry.npmjs.org/playwright-core/-/playwright-core-1.53.1.tgz";
+    hash = "sha512-Z46Oq7tLAyT0lGoFx4DOuB1IA9D1TPj0QkYxpPVUnGDqHHvDpCftu1J2hM2PiWsNMoZh8+LQaarAWcDfPBc6zg==";
   };
   "undici-types" = {
     out_path = "undici-types";
