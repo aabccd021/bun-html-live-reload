@@ -87,9 +87,11 @@ export function withHtmlLiveReload(
 
     if (requestUrl.pathname === scriptPath) {
       return new Response(
-        `new EventSource("${eventPath}").onmessage = function(msg) {  
+        `const sse = new EventSource("${eventPath}");
+         sse.onmessage = function(msg) {
           if(msg.data === 'RELOAD') { location.reload(); }
-         };`,
+         };
+         window.addEventListener('beforeunload', () => sse.close());`,
         { headers: { "Content-Type": "text/javascript" } },
       );
     }
