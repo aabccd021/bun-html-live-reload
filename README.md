@@ -19,6 +19,7 @@ Bun.serve({
   }),
 });
 
+// Refresh browser when the server is ready after each hot reload
 reload();
 ```
 
@@ -48,26 +49,6 @@ Bun.serve({
     },
   ),
 });
-```
-
-## Manually reload clients
-
-You can manually reload clients (refresh tabs) by calling `reload` function,
-in addition to auto reload feature.
-
-```ts
-import { withHtmlLiveReload, reload } from "bun-html-live-reload";
-
-Bun.serve({
-  fetch: withHtmlLiveReload(async (request) => {
-    /* ... */
-  }),
-});
-
-// reload clients every second
-setInterval(() => {
-  reload();
-}, 1000);
 ```
 
 ## LICENCE

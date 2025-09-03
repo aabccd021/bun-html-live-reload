@@ -37,8 +37,8 @@
         withChromiumHeadlessShell = true;
       };
 
-      packages.test =
-        pkgs.runCommand "tests"
+      packages.check-test =
+        pkgs.runCommand "check-test"
           {
             buildInputs = [ pkgs.bun ];
             env.PLAYWRIGHT_BROWSERS_PATH = browsers;
