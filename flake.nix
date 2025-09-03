@@ -8,20 +8,6 @@
   outputs =
     { self, ... }@inputs:
     let
-      lib = inputs.nixpkgs.lib;
-
-      collectInputs =
-        is:
-        pkgs.linkFarm "inputs" (
-          builtins.mapAttrs (
-            name: i:
-            pkgs.linkFarm name {
-              self = i.outPath;
-              deps = collectInputs (lib.attrByPath [ "inputs" ] { } i);
-            }
-          ) is
-        );
-
       pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
 
       treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
@@ -97,7 +83,6 @@
 
       packages = {
         formatting = treefmtEval.config.build.check self;
-        allInputs = collectInputs inputs;
         tsc = tsc;
         publish = publish;
         test-no-autoreload = mkTest "no-autoreload";
