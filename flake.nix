@@ -35,8 +35,6 @@
         settings.global.excludes = [ "LICENSE" ];
       };
 
-      formatter = treefmtEval.config.build.wrapper;
-
       node_modules = import ./node_modules.nix { pkgs = pkgs; };
 
       tsc = pkgs.runCommand "tsc" { } ''
@@ -97,22 +95,8 @@
         '';
       };
 
-      devShells.default = pkgs.mkShellNoCC {
-        shellHook = ''
-          export PLAYWRIGHT_BROWSERS_PATH=${browsers}
-        '';
-        buildInputs = [
-          pkgs.bun
-          pkgs.typescript
-          pkgs.vscode-langservers-extracted
-          pkgs.nixd
-          pkgs.typescript-language-server
-        ];
-      };
-
-      packages = devShells // {
+      packages = {
         formatting = treefmtEval.config.build.check self;
-        formatter = formatter;
         allInputs = collectInputs inputs;
         tsc = tsc;
         publish = publish;
@@ -129,7 +113,6 @@
       };
 
       checks.x86_64-linux = packages;
-      formatter.x86_64-linux = formatter;
-      devShells.x86_64-linux = devShells;
+      formatter.x86_64-linux = treefmtEval.config.build.wrapper;
     };
 }
