@@ -1,22 +1,31 @@
 {
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
     "lib": ["ESNext"],
     "module": "Preserve",
     "moduleDetection": "force",
     "moduleResolution": "bundler",
+    "target": "ESNext",
+
+    // Output
     "noEmit": true,
+
+    // Strict
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "isolatedModules": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ESNext",
-    "verbatimModuleSyntax": true
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true,
+
+    // Misc
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true
   }
 }
