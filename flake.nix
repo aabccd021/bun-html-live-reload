@@ -23,7 +23,7 @@
 
       node_modules = import ./node_modules.nix { pkgs = pkgs; };
 
-      tsc = pkgs.runCommand "tsc" { } ''
+      packages.check-tsc = pkgs.runCommand "tsc" { } ''
         cp -L ${./index.ts} ./index.ts
         cp -Lr ${./test} ./test
         cp -L ${./tsconfig.json} ./tsconfig.json
@@ -60,43 +60,14 @@
             touch $out
           '';
 
-      publish = pkgs.writeShellApplication {
-        name = "publish";
-        runtimeInputs = [
-          pkgs.jq
-          pkgs.bun
-          pkgs.curl
-        ];
-        text = ''
-          repo_root=$(git rev-parse --show-toplevel)
-          current_version=$(jq -r .version "$repo_root/package.json")
-          name=$(jq -r .name "$repo_root/package.json")
-          published_version=$(curl -s "https://registry.npmjs.org/$name" | jq -r '.["dist-tags"].latest')
-          if [ "$published_version" = "$current_version" ]; then
-            echo "Version $current_version is already published"
-            exit 0
-          fi
-          nix flake check
-          bun publish
-        '';
-      };
-
-      packages = {
-        formatting = treefmtEval.config.build.check self;
-        tsc = tsc;
-        publish = publish;
-        test-no-autoreload = mkTest "no-autoreload";
-        test-reload = mkTest "reload";
-      };
+      packages.check-formatting = treefmtEval.config.build.check self;
+      packages.test-no-autoreload = mkTest "no-autoreload";
+      packages.test-reload = mkTest "reload";
 
     in
     {
 
-      packages.x86_64-linux = packages // rec {
-        gcroot = pkgs.linkFarm "gcroot" packages;
-        default = gcroot;
-      };
-
+      packages.x86_64-linux = packages;
       checks.x86_64-linux = packages;
       formatter.x86_64-linux = treefmtEval.config.build.wrapper;
     };
