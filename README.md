@@ -9,8 +9,7 @@ bun add -d bun-html-live-reload@github:aabccd021/bun-html-live-reload
 ```
 
 ```ts
-// example.ts
-import { withHtmlLiveReload } from "bun-html-live-reload";
+import { withHtmlLiveReload, reload } from "bun-html-live-reload";
 
 Bun.serve({
   fetch: withHtmlLiveReload(async (request) => {
@@ -19,6 +18,8 @@ Bun.serve({
     });
   }),
 });
+
+reload();
 ```
 
 - Run the server with `bun --hot example.ts`, open browser, and try to edit the `hello world` part.
@@ -44,11 +45,6 @@ Bun.serve({
       // Live reload script path
       // default: "/__dev__/reload.js"
       scriptPath: "/__reload.js",
-
-      // Wether to enable auto reload.
-      // If false, you need to manually call `reloadClients` function to reload clients.
-      // default: true
-      autoReload: false,
     },
   ),
 });
@@ -56,11 +52,11 @@ Bun.serve({
 
 ## Manually reload clients
 
-You can manually reload clients (refresh tabs) by calling `reloadClients` function,
+You can manually reload clients (refresh tabs) by calling `reload` function,
 in addition to auto reload feature.
 
 ```ts
-import { withHtmlLiveReload, reloadClients } from "bun-html-live-reload";
+import { withHtmlLiveReload, reload } from "bun-html-live-reload";
 
 Bun.serve({
   fetch: withHtmlLiveReload(async (request) => {
@@ -70,73 +66,8 @@ Bun.serve({
 
 // reload clients every second
 setInterval(() => {
-  reloadClients();
+  reload();
 }, 1000);
-```
-
-# Changes from v0.1
-
-- Messages are sent through SSE (HTTP streaming) instead of Websocket.
-- Wraps only `fetch` function instead of the whole server.
-- Exposes `reloadClients` function to manually reload clients.
-- Uses separate javascript file instead of inline script to comply with strict CSP.
-- Supports multiple clients (tabs).
-- Added tests
-
-# Migration from v0.1
-
-## v0.1
-
-```ts
-import { withHtmlLiveReload } from "bun-html-live-reload";
-import { $ } from "bun";
-
-export default Bun.serve(
-  withHtmlLiveReload(
-    {
-      fetch: (request) => {
-        /* ... */
-      },
-    },
-    {
-      watchPath: path.resolve(import.meta.dir, "src"),
-      buildConfig: {
-        entrypoints: ["./src/index.tsx"],
-        outdir: "./build",
-      },
-      onChange: async () => {
-        await $`rm -r ./dist`;
-      },
-    },
-  ),
-);
-```
-
-## v1.0
-
-```ts
-import { withHtmlLiveReload, reloadClients } from "bun-html-live-reload";
-import { FSWatcher, watch } from "fs";
-import { $ } from "bun";
-
-const buildConfig = {
-  entrypoints: ["./src/index.tsx"],
-  outdir: "./build",
-};
-
-Bun.build(buildConfig);
-
-watch(path.resolve(import.meta.url, "src")).on("change", async () => {
-  await $`rm -r ./dist`;
-  await Bun.build(buildConfig);
-  reloadClients();
-});
-
-Bun.serve({
-  fetch: withHtmlLiveReload(async (request) => {
-    /* ... */
-  }),
-});
 ```
 
 ## LICENCE

@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const serverCodeInitial = `
-import { withHtmlLiveReload } from "./index.ts";
+import { withHtmlLiveReload, reload } from "./index.ts";
 
 Bun.serve({
   port: 3000,
@@ -11,10 +11,12 @@ Bun.serve({
     });
   }),
 });
+
+reload();
 `;
 
 const serverCodeChanged = `
-import { withHtmlLiveReload } from "./index.ts";
+import { withHtmlLiveReload, reload } from "./index.ts";
 
 Bun.serve({
   port: 3000,
@@ -24,6 +26,8 @@ Bun.serve({
     });
   }),
 });
+
+reload();
 `;
 
 await Bun.write("server.ts", serverCodeInitial);

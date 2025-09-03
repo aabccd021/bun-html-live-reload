@@ -1,21 +1,15 @@
 declare global {
   var clients: Set<ReadableStreamDefaultController> | undefined;
-  var autoReload: boolean | undefined;
 }
 
 globalThis.clients ??= new Set<ReadableStreamDefaultController>();
-globalThis.autoReload = globalThis.autoReload ?? true;
 
-export function reloadClients(): void {
+export function reload(): void {
   if (globalThis.clients !== undefined) {
     for (const client of globalThis.clients) {
       client.enqueue("data: RELOAD\n\n");
     }
   }
-}
-
-if (globalThis.autoReload) {
-  reloadClients();
 }
 
 export type LiveReloadOptions = {
@@ -47,12 +41,8 @@ export function withHtmlLiveReload(
   options?: {
     eventPath?: string;
     scriptPath?: string;
-    autoReload?: false;
   },
 ): Fetch {
-  if (options?.autoReload === false) {
-    globalThis.autoReload = false;
-  }
   return async (req): Promise<Response> => {
     if (req.method !== "GET") {
       return handler(req);
