@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "postinstall": "curl -fsSL https://raw.githubusercontent.com/aabccd021/bun2node_modules/refs/heads/main/index.js | bun - > ./node_modules.nix"
+    "postinstall": "curl -fsSL https://raw.githubusercontent.com/aabccd021/bun2node_modules/refs/heads/main/index.js | bun - > ./node_modules.nix && rm bun.lock"
   },
   "devDependencies": {
     "@types/bun": "latest",
