@@ -1,6 +1,6 @@
 # bun-html-live-reload
 
-HTML live reload for Bun
+HTML live reload for Bun.
 
 ## Getting Started
 
@@ -19,7 +19,8 @@ Bun.serve({
   }),
 });
 
-// Refresh browser when the server is ready after each hot reload
+// Refresh browser everytime the server is ready after hot reload
+// You can call this function anywhere in your code to refresh browser
 reload();
 ```
 
