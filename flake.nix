@@ -29,33 +29,29 @@
         touch $out
       '';
 
-      mkTest =
-        testFile:
+      browsers = pkgs.playwright.browsers.overrideAttrs {
+        withChromium = false;
+        withFirefox = false;
+        withWebkit = false;
+        withFfmpeg = false;
+        withChromiumHeadlessShell = true;
+      };
+
+      packages.test =
         pkgs.runCommand "tests"
           {
-            buildInputs = [
-              pkgs.bun
-            ];
-            env.PLAYWRIGHT_BROWSERS_PATH = pkgs.playwright.browsers.overrideAttrs {
-              withChromium = false;
-              withFirefox = false;
-              withWebkit = false;
-              withFfmpeg = false;
-              withChromiumHeadlessShell = true;
-            };
+            buildInputs = [ pkgs.bun ];
+            env.PLAYWRIGHT_BROWSERS_PATH = browsers;
           }
           ''
             cp -L ${./index.ts} ./index.ts
-            cp -Lr ${./test} ./test
-            cp -L ${./package.json} ./package.json
-            cp -L ${./tsconfig.json} ./tsconfig.json
             cp -Lr ${node_modules} ./node_modules
-            bun test ./test/${testFile}.test.ts
+            cp -Lr ${./test/reload.test.ts} ./reload.test.ts
+            timeout 5 bun ./reload.test.ts
             touch $out
           '';
 
       packages.check-formatting = treefmtEval.config.build.check self;
-      packages.test-reload = mkTest "reload";
 
     in
     {

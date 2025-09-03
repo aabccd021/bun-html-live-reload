@@ -1,11 +1,10 @@
-import { expect, test } from "bun:test";
-import * as fs from "node:fs";
 import { chromium } from "playwright";
 
-const serverCodeInit = `
-import { withHtmlLiveReload } from "./bun-html-live-reload.ts";
+const serverCodeInitial = `
+import { withHtmlLiveReload } from "./index.ts";
 
 Bun.serve({
+  port: 3000,
   fetch: withHtmlLiveReload(async () => {
     return new Response("<div>Init</div>", {
       headers: { "Content-Type": "text/html" },
@@ -15,8 +14,10 @@ Bun.serve({
 `;
 
 const serverCodeChanged = `
-import { withHtmlLiveReload } from "./bun-html-live-reload.ts";
+import { withHtmlLiveReload } from "./index.ts";
+
 Bun.serve({
+  port: 3000,
   fetch: withHtmlLiveReload(async () => {
     return new Response("<div>Changed</div>", {
       headers: { "Content-Type": "text/html" },
@@ -25,27 +26,22 @@ Bun.serve({
 });
 `;
 
-test("hot reload works", async () => {
-  const systemTmp = process.env.TMPDIR ?? "/tmp";
-  const tmpdir = fs.mkdtempSync(`${systemTmp}/bun-`);
-  const serverPath = `${tmpdir}/server.ts`;
+await Bun.write("server.ts", serverCodeInitial);
 
-  await Bun.write(serverPath, serverCodeInit);
+const serverProcess = Bun.spawn(["bun", "--hot", "server.ts"]);
 
-  fs.copyFileSync(`${import.meta.dir}/../index.ts`, `${tmpdir}/bun-html-live-reload.ts`);
+const browser = await chromium.launch();
 
-  Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
+const context = await browser.newContext();
+const page = await context.newPage();
+await page.goto("http://localhost:3000");
 
-  const browser = await chromium.launch({});
+if ((await page.locator("div").textContent()) !== "Init") throw new Error();
 
-  const context = await browser.newContext();
-  const page = await context.newPage();
-  await page.goto("http://localhost:3000");
+await Bun.write("server.ts", serverCodeChanged);
+await page.waitForEvent("framenavigated");
 
-  expect(await page.locator("div").textContent()).toBe("Init");
+if ((await page.locator("div").textContent()) !== "Changed") throw new Error();
 
-  await Bun.write(serverPath, serverCodeChanged);
-  await page.waitForEvent("framenavigated");
-
-  expect(await page.locator("div").textContent()).toBe("Changed");
-});
+await browser.close();
+serverProcess.kill();
