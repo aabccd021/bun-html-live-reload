@@ -22,7 +22,7 @@
 
       packages.check-tsc = pkgs.runCommand "tsc" { } ''
         cp -L ${./index.ts} ./index.ts
-        cp -Lr ${./test} ./test
+        cp -L ${./test.ts} ./test.ts
         cp -L ${./tsconfig.json} ./tsconfig.json
         cp -Lr ${node_modules} ./node_modules
         ${pkgs.typescript}/bin/tsc
@@ -45,9 +45,9 @@
           }
           ''
             cp -L ${./index.ts} ./index.ts
+            cp -L ${./test.ts} ./test.ts
             cp -Lr ${node_modules} ./node_modules
-            cp -Lr ${./test/reload.test.ts} ./reload.test.ts
-            timeout 5 bun ./reload.test.ts
+            timeout 5 bun ./test.ts
             touch $out
           '';
 
