@@ -5,7 +5,7 @@ HTML live reload for Bun
 ## Getting Started
 
 ```sh
-bun add -d bun-html-live-reload
+bun add -d bun-html-live-reload@github:aabccd021/bun-html-live-reload
 ```
 
 ```ts
