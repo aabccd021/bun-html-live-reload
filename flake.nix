@@ -4,7 +4,6 @@
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
-  inputs.bun2nix.url = "github:baileyluTCD/bun2nix";
 
   outputs =
     { self, ... }@inputs:
@@ -25,9 +24,6 @@
 
       pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
 
-      bunNix = import ./bun.nix;
-      nodeModules = inputs.bun2nix.lib.x86_64-linux.mkBunNodeModules { packages = bunNix; };
-
       treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
         projectRootFile = "flake.nix";
         programs.nixfmt.enable = true;
@@ -41,11 +37,13 @@
 
       formatter = treefmtEval.config.build.wrapper;
 
+      node_modules = import ./node_modules.nix { pkgs = pkgs; };
+
       tsc = pkgs.runCommand "tsc" { } ''
         cp -L ${./index.ts} ./index.ts
         cp -Lr ${./test} ./test
         cp -L ${./tsconfig.json} ./tsconfig.json
-        cp -Lr ${nodeModules}/node_modules ./node_modules
+        cp -Lr ${node_modules} ./node_modules
         ${pkgs.typescript}/bin/tsc
         touch $out
       '';
@@ -73,7 +71,7 @@
             cp -Lr ${./test} ./test
             cp -L ${./package.json} ./package.json
             cp -L ${./tsconfig.json} ./tsconfig.json
-            cp -Lr ${nodeModules}/node_modules ./node_modules
+            cp -Lr ${node_modules} ./node_modules
             bun test ./test/${testFile}.test.ts
             touch $out
           '';
@@ -117,11 +115,9 @@
         formatter = formatter;
         allInputs = collectInputs inputs;
         tsc = tsc;
-        nodeModules = nodeModules;
         publish = publish;
         test-no-autoreload = mkTest "no-autoreload";
         test-reload = mkTest "reload";
-        bun2nix = inputs.bun2nix.packages.x86_64-linux.default;
       };
 
     in
