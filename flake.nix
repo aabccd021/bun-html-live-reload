@@ -11,7 +11,6 @@
       pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
 
       treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs {
-        projectRootFile = "flake.nix";
         programs.nixfmt.enable = true;
         programs.biome.enable = true;
         programs.biome.formatUnsafe = true;
