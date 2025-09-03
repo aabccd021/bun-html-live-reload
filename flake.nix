@@ -46,7 +46,6 @@
           {
             buildInputs = [
               pkgs.bun
-              pkgs.musl
             ];
             env.PLAYWRIGHT_BROWSERS_PATH = browsers;
           }
