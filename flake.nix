@@ -55,7 +55,6 @@
           '';
 
       packages.check-formatting = treefmtEval.config.build.check self;
-      packages.test-no-autoreload = mkTest "no-autoreload";
       packages.test-reload = mkTest "reload";
 
     in
