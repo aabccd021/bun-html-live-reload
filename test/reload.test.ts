@@ -26,16 +26,13 @@ Bun.serve({
 `;
 
 test("hot reload works", async () => {
-  const systemTmp = process.env["TMPDIR"] ?? "/tmp";
+  const systemTmp = process.env.TMPDIR ?? "/tmp";
   const tmpdir = fs.mkdtempSync(`${systemTmp}/bun-`);
   const serverPath = `${tmpdir}/server.ts`;
 
   await Bun.write(serverPath, serverCodeInit);
 
-  fs.copyFileSync(
-    `${import.meta.dir}/../index.ts`,
-    `${tmpdir}/bun-html-live-reload.ts`,
-  );
+  fs.copyFileSync(`${import.meta.dir}/../index.ts`, `${tmpdir}/bun-html-live-reload.ts`);
 
   Bun.spawn(["bun", "--hot", serverPath], { stderr: "ignore" });
 
