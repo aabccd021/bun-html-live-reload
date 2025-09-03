@@ -16,6 +16,8 @@
         programs.biome.formatUnsafe = true;
         programs.biome.settings.formatter.indentStyle = "space";
         programs.biome.settings.formatter.lineWidth = 100;
+        programs.prettier.enable = true;
+        programs.prettier.includes = [ "*.md" ];
       };
 
       node_modules = import ./node_modules.nix { pkgs = pkgs; };
